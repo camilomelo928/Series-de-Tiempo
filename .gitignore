@@ -1,15 +1,1 @@
-# --- R ---
-.Rhistory
-.Rapp.history
-.RData
-.Ruserdata
-.Rproj.user/
-*.Rproj
-
-# --- Shiny / deploy ---
-rsconnect/
-
-# --- Sistema operativo ---
-.DS_Store
-Thumbs.db
-desktop.ini
+(src/suavizados.R)

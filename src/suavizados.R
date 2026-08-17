@@ -30,7 +30,7 @@ ts_df <- function(x, serie) {
 }
 
 # Interpreta la primera columna del CSV como eje temporal.
-# Acepta tiempo numérico (1960, 1960.25) o fechas tipo "1960-03-31".
+# Acepta tiempo numérico (1960, 1960.25) o fechas tipo "1960-03-31", "31/03/1960", etc.
 parse_tiempo <- function(col) {
   if (is.numeric(col)) {
     return(list(t = col, tipo = "numérico"))
@@ -43,8 +43,8 @@ parse_tiempo <- function(col) {
     return(list(t = num, tipo = "numérico"))
   }
 
-  # Fechas. as.Date() lanza error (no NA) si el texto no parece fecha,
-  # por eso hace falta tryCatch y no basta con suppressWarnings.
+  # Fechas: intentar múltiples formatos (ymd, dmy, mdy) para soportar regiones
+  # Formato ISO: YYYY-MM-DD
   d <- tryCatch(suppressWarnings(as.Date(txt)),
                 error = function(e) as.Date(rep(NA_character_, length(txt))))
   if (sum(!is.na(d)) > length(d) / 2) {
@@ -52,6 +52,34 @@ parse_tiempo <- function(col) {
     dia  <- as.numeric(format(d, "%j"))
     return(list(t = anio + (dia - 1) / 365.25, tipo = "fecha"))
   }
+
+  # Formato regional latino/europeo: DD/MM/YYYY o DD-MM-YYYY
+  d <- tryCatch(suppressWarnings(as.Date(txt, format = "%d/%m/%Y")),
+                error = function(e) as.Date(rep(NA_character_, length(txt))))
+  if (sum(!is.na(d)) > length(d) / 2) {
+    anio <- as.numeric(format(d, "%Y"))
+    dia  <- as.numeric(format(d, "%j"))
+    return(list(t = anio + (dia - 1) / 365.25, tipo = "fecha"))
+  }
+
+  # Formato alternativo: DD-MM-YYYY
+  d <- tryCatch(suppressWarnings(as.Date(txt, format = "%d-%m-%Y")),
+                error = function(e) as.Date(rep(NA_character_, length(txt))))
+  if (sum(!is.na(d)) > length(d) / 2) {
+    anio <- as.numeric(format(d, "%Y"))
+    dia  <- as.numeric(format(d, "%j"))
+    return(list(t = anio + (dia - 1) / 365.25, tipo = "fecha"))
+  }
+
+  # Formato MM/DD/YYYY (US)
+  d <- tryCatch(suppressWarnings(as.Date(txt, format = "%m/%d/%Y")),
+                error = function(e) as.Date(rep(NA_character_, length(txt))))
+  if (sum(!is.na(d)) > length(d) / 2) {
+    anio <- as.numeric(format(d, "%Y"))
+    dia  <- as.numeric(format(d, "%j"))
+    return(list(t = anio + (dia - 1) / 365.25, tipo = "fecha"))
+  }
+
   # Último recurso: tratarla como un simple índice 1, 2, 3, ...
   list(t = seq_along(col), tipo = "índice")
 }
@@ -377,12 +405,21 @@ server <- function(input, output, session) {
     }
 
     req(input$file)
-    df <- utils::read.csv(input$file$datapath, stringsAsFactors = FALSE)
+    # Fallback: intentar read.csv (separador ,), luego read.csv2 (separador ;)
+    df <- tryCatch(
+      utils::read.csv(input$file$datapath, stringsAsFactors = FALSE),
+      error = function(e) {
+        utils::read.csv2(input$file$datapath, stringsAsFactors = FALSE)
+      }
+    )
     validate(need(ncol(df) >= 2,
                   "El archivo debe tener al menos dos columnas (tiempo y observaciones)."))
 
     tt <- parse_tiempo(df[[1]])
-    vv <- suppressWarnings(as.numeric(df[[2]]))
+    # Normalizar decimales: convertir comas a puntos antes de pasar a numérico
+    col2_txt <- as.character(df[[2]])
+    col2_norm <- gsub(",", ".", col2_txt)
+    vv <- suppressWarnings(as.numeric(col2_norm))
     validate(need(sum(!is.na(vv)) > 2,
                   "La segunda columna no parece numérica. Revisa separadores decimales."))
 
