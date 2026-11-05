@@ -1,5 +1,11 @@
 # Documento escrito
 
-Aquí van la fuente LaTeX (`Seminario.tex`, `escudo.jpg`) y el PDF del entregable.
-El documento se escribe en Overleaf; cuando haya una versión estable se descarga
-(Menu → Download → Source) y se copia a esta carpeta.
+Entregable escrito del seminario, hecho con la plantilla del curso.
+
+- `Seminario_ARFIMA.pdf`: versión compilada.
+- `Seminario.tex`: fuente LaTeX (se escribe en Overleaf).
+- `escudo.jpg` y `figuras/`: archivos que usa el `.tex`. Las figuras son las mismas
+  que genera el notebook en `../figuras`.
+
+Para compilar localmente: `pdflatex Seminario.tex` dentro de esta carpeta (dos veces,
+para que salgan bien las referencias a tablas y figuras).
