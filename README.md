@@ -1,4 +1,14 @@
-# Métodos de suavizamiento para series de tiempo
+# Series de Tiempo — UdeA
+
+Trabajos del curso de **Series de Tiempo I** (Estadística, Universidad de Antioquia).
+
+| Proyecto | Carpeta | Qué es |
+|---|---|---|
+| Seminario ARFIMA | [`seminario-arfima/`](seminario-arfima/) | Documento escrito, notebook reproducible en R y presentación Beamer sobre modelos de memoria larga, con aplicación al río Nilo |
+| App de suavizamiento | [`src/suavizados.R`](src/suavizados.R) | App Shiny para comparar medias móviles, SES y Holt-Winters |
+| Copias de clase | [`copias-clase/`](copias-clase/) | Notebooks del curso ejecutados como práctica |
+
+## App de suavizamiento: métodos de suavizamiento para series de tiempo
 
 Aplicación interactiva en R (Shiny) para ajustar y comparar tres métodos clásicos
 de suavizamiento sobre una serie de tiempo cargada desde un archivo CSV.
@@ -6,13 +16,13 @@ de suavizamiento sobre una serie de tiempo cargada desde un archivo CSV.
 Desarrollada como trabajo del curso de **Análisis de Series de Tiempo**,
 Universidad de Antioquia.
 
-## Qué hace
+### Qué hace
 
 Cargas un CSV con dos columnas —tiempo y observaciones— y la app ajusta el método
 que elijas, grafica el resultado con su intervalo del 95 %, reporta las métricas de
 error dentro de muestra y te deja pronosticar a `h` períodos.
 
-### Métodos implementados
+#### Métodos implementados
 
 | Método | Componentes que modela | Parámetros |
 |---|---|---|
@@ -20,7 +30,7 @@ error dentro de muestra y te deja pronosticar a `h` períodos.
 | Suavización exponencial simple (SES) | Nivel | `α` (manual u optimizado) |
 | Holt-Winters | Nivel, tendencia y estación | `α`, `β`, `γ` (manuales u optimizados) |
 
-### Pestañas
+#### Pestañas
 
 - **Descomposición** — separa la serie en tendencia, estacionalidad y residuo, con
   selector aditivo/multiplicativo y la tabla de índices estacionales estimados.
@@ -31,7 +41,7 @@ error dentro de muestra y te deja pronosticar a `h` períodos.
 - **Comparación** — los tres métodos ajustados a la misma serie y una tabla de errores
   para contrastarlos de un vistazo.
 
-## Requisitos
+### Requisitos
 
 R 4.x y tres paquetes:
 
@@ -48,7 +58,7 @@ install.packages("astsa")
 
 Sin ella la app funciona igual, con `AirPassengers` como serie de ejemplo.
 
-## Cómo ejecutarla
+### Cómo ejecutarla
 
 Desde la terminal, parado en la raíz del proyecto:
 
@@ -61,7 +71,7 @@ En Windows con PowerShell, usa `Rscript.exe` (a secas, `R` es un alias de
 
 También puedes abrir `src/suavizados.R` en RStudio y usar el botón **Run App**.
 
-## Formato del CSV
+### Formato del CSV
 
 Dos columnas, con encabezado:
 
@@ -74,7 +84,7 @@ mano (1 anual, 4 trimestral, 12 mensual) desde la barra lateral. Holt-Winters
 estacional necesita frecuencia mayor que 1 y al menos dos ciclos completos; si la
 serie no cumple, la app cae automáticamente a Holt (nivel y tendencia) y lo avisa.
 
-## Notas sobre la implementación
+### Notas sobre la implementación
 
 **Alineación de la media móvil.** El suavizado en `t` promedia `y_t … y_{t-k+1}` y se
 usa como predicción de `t+1`, así que los valores ajustados van corridos un período.
