@@ -1,0 +1,375 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-nodecimaldot,es-tabla]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{colortbl}
+\usepackage{xurl}
+
+% ---------------- Apariencia ----------------
+\usetheme{Madrid}
+\definecolor{udeaverde}{RGB}{0,102,51}
+\definecolor{udeaclaro}{RGB}{226,239,231}
+\definecolor{rojo}{RGB}{178,34,34}
+\setbeamercolor{structure}{fg=udeaverde}
+\setbeamercolor{palette primary}{bg=udeaverde,fg=white}
+\setbeamercolor{palette secondary}{bg=udeaverde!85!black,fg=white}
+\setbeamercolor{palette tertiary}{bg=udeaverde!70!black,fg=white}
+\setbeamercolor{title}{bg=udeaverde,fg=white}
+\setbeamercolor{frametitle}{bg=udeaverde,fg=white}
+\setbeamercolor{block title}{bg=udeaverde,fg=white}
+\setbeamercolor{block body}{bg=udeaclaro}
+\setbeamercolor{block title alerted}{bg=rojo,fg=white}
+\setbeamercolor{block body alerted}{bg=rojo!8}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize items}[circle]
+
+\newcommand{\destacar}[1]{\textcolor{udeaverde}{\textbf{#1}}}
+
+% ---------------- Portada ----------------
+\title[Modelos ARFIMA]{Más allá de ARMA y ARIMA}
+\subtitle{Modelos ARFIMA para series con memoria larga}
+\author[Melo y Duque]{Juan Camilo Melo Ortíz \and Santiago Duque Pérez}
+\institute[UdeA]{Seminario de Series de Tiempo I\\Profesor: Duván Cataño\\Universidad de Antioquia}
+\date{Semestre 2026-2}
+\titlegraphic{\includegraphics[height=1.5cm]{escudo.jpg}}
+
+\begin{document}
+
+% =================================================================
+\begin{frame}
+\titlepage
+\end{frame}
+
+% =================================================================
+\begin{frame}{Agenda}
+\tableofcontents
+\end{frame}
+
+% =================================================================
+\section{El problema}
+\begin{frame}{El problema: dos extremos y nada en la mitad}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\begin{block}{ARMA $(d = 0)$}
+\begin{itemize}
+\item Serie estacionaria
+\item Los choques se olvidan rápido
+\item ACF cae \destacar{exponencialmente}
+\end{itemize}
+\end{block}
+\column{0.48\textwidth}
+\begin{block}{ARIMA $(d = 1)$}
+\begin{itemize}
+\item Raíz unitaria
+\item Los choques son \destacar{permanentes}
+\item Hay que diferenciar la serie
+\end{itemize}
+\end{block}
+\end{columns}
+\vspace{0.5cm}
+\begin{alertblock}{¿Y si una serie no es ninguna de las dos?}
+Autocorrelaciones pequeñas, pero que \textbf{bajan muy despacio}: un ARMA se queda corto y un ARIMA se pasa.
+\end{alertblock}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Un poco de historia: Hurst y el río Nilo}
+\begin{itemize}
+\item H.~E.~Hurst, hidrólogo británico, diseñaba represas sobre el Nilo.
+\item Estudió cómo crece el rango ajustado de los caudales acumulados ($R/S$) con el tamaño de muestra $n$.
+\end{itemize}
+\vspace{0.3cm}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\begin{block}{Si los años fueran independientes}
+\centering $R/S \sim n^{0.5}$
+\end{block}
+\column{0.48\textwidth}
+\begin{alertblock}{Lo que encontró Hurst (1951)}
+\centering $R/S \sim n^{H}$, \quad $H > 0.5$\\ (alrededor de 0.7 en promedio)
+\end{alertblock}
+\end{columns}
+\vspace{0.3cm}
+\begin{itemize}
+\item Los años secos venían seguidos de \destacar{más años secos}, durante períodos mucho más largos de lo esperado: el \destacar{efecto Hurst}.
+\end{itemize}
+\end{frame}
+
+% =================================================================
+\section{Teoría de los modelos ARFIMA}
+\begin{frame}{¿Qué es la memoria larga?}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\textbf{Memoria corta (ARMA)}
+\[
+|\rho(h)| \le C\,r^{h}, \quad 0<r<1
+\]
+Decaimiento \destacar{exponencial}: $\sum_h |\rho(h)| < \infty$.
+\column{0.48\textwidth}
+\textbf{Memoria larga}
+\[
+\rho(h) \sim C\,h^{2d-1}, \quad 0<d<\tfrac12
+\]
+Decaimiento \destacar{hiperbólico}: $\sum_h |\rho(h)| = \infty$.
+\end{columns}
+\vspace{0.6cm}
+\begin{block}{En el dominio de las frecuencias}
+\[
+f(\lambda) \sim C_f\,\lambda^{-2d}, \qquad \lambda \to 0^{+}
+\]
+El espectro \textbf{se dispara en la frecuencia cero}: mucha variabilidad en ciclos de período muy largo.
+\end{block}
+\end{frame}
+
+% =================================================================
+\begin{frame}{La diferenciación fraccional}
+\textbf{Idea de Granger y Joyeux (1980) y Hosking (1981):} dejar que $d$ tome valores \destacar{no enteros}.
+\vspace{0.3cm}
+\begin{block}{¿Qué significa $(1-B)^{0.3}$? Expansión binomial}
+\[
+(1-B)^{d} = \sum_{j=0}^{\infty}\pi_j B^{j} = 1 - dB - \frac{d(1-d)}{2!}B^{2} - \cdots,
+\qquad \pi_j = \pi_{j-1}\,\frac{j-1-d}{j}
+\]
+\end{block}
+\begin{itemize}
+\item Si $d=1$: la suma se corta y queda $1-B$ (la diferencia de siempre).
+\item Si $d$ no es entero: la suma es \destacar{infinita}, y $(1-B)^d x_t$ depende de \textbf{todo el pasado}, con pesos que decaen lentamente ($\pi_j \sim j^{-d-1}$).
+\item Es un punto intermedio entre no diferenciar ($d=0$) y diferenciar una vez ($d=1$).
+\end{itemize}
+\end{frame}
+
+% =================================================================
+\begin{frame}{El caso más sencillo: ruido fraccional ARFIMA$(0,d,0)$}
+\[
+(1-B)^{d}x_t = w_t, \qquad w_t \sim RB(0,\sigma_w^2)
+\]
+\begin{columns}[T]
+\column{0.5\textwidth}
+\begin{itemize}
+\item Estacionario si $d < \tfrac12$
+\item Invertible si $d > -\tfrac12$
+\item Un \destacar{solo parámetro} para toda la memoria
+\end{itemize}
+\column{0.5\textwidth}
+\textbf{Su ACF} (Hosking, 1981):
+\[
+\rho(h) = \prod_{k=1}^{h}\frac{k-1+d}{k-d}, \qquad \rho(1) = \frac{d}{1-d}
+\]
+\end{columns}
+\vspace{0.2cm}
+\begin{block}{Ejemplo}
+Con $d = 0.4$: $\rho(1) = 0.67$ y $\rho(50) \approx 0.31$. En un AR(1) con la misma $\rho(1)$, $\rho(50) \approx 0$.
+\end{block}
+\end{frame}
+
+% =================================================================
+\begin{frame}{El modelo completo: ARFIMA$(p,d,q)$}
+\[
+\phi(B)\,(1-B)^{d}\,(x_t-\mu) = \theta(B)\,w_t
+\]
+\begin{itemize}
+\item $d$ describe el \destacar{largo plazo}; $\phi$ y $\theta$, el \destacar{corto plazo}.
+\item Exponente de Hurst: \;$H = d + \tfrac12$.
+\end{itemize}
+\vspace{0.2cm}
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Valor de $d$} & \textbf{Comportamiento} \\
+\midrule
+$-\tfrac12 < d < 0$ & Estacionario, antipersistente \\
+$d = 0$ & ARMA: memoria corta \\
+\rowcolor{udeaclaro} $0 < d < \tfrac12$ & \textbf{Estacionario con memoria larga} \\
+$\tfrac12 \le d < 1$ & No estacionario, revierte a la media \\
+$d = 1$ & ARIMA: raíz unitaria \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Estimación de $d$ (1): el estimador GPH}
+\textbf{Geweke y Porter-Hudak (1983)} aprovechan la forma del espectro cerca de cero.
+\begin{columns}[T]
+\column{0.52\textwidth}
+\begin{block}{La idea}
+\begin{itemize}
+\item Cerca del origen, $f(\lambda) \approx C\,\lambda^{-2d}$
+\item Tomando logaritmos: $\log f(\lambda) \approx c - 2d\,\log\lambda$
+\item En escala log-log es una \destacar{recta}, y su pendiente da $d$
+\item El espectro se estima con el \destacar{periodograma} $I(\lambda_j)$
+\end{itemize}
+\end{block}
+\column{0.44\textwidth}
+\begin{block}{La regresión}
+\[
+\log I(\lambda_j) = c - d\,\log\!\left[4\sin^2\!\tfrac{\lambda_j}{2}\right] + e_j
+\]
+\begin{itemize}
+\item Solo las $m$ frecuencias más bajas
+\item Propuesta original: $m = \sqrt{n}$
+\item $\hat d$ = pendiente por MCO, con el signo cambiado
+\end{itemize}
+\end{block}
+\end{columns}
+\vspace{0.2cm}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\textcolor{udeaverde}{\textbf{+}} No hay que escoger $p$ ni $q$ (semiparamétrico)
+\column{0.48\textwidth}
+\textcolor{rojo}{\textbf{$-$}} Depende mucho de $m$ y su varianza es grande: $\pi^2/(24m)$
+\end{columns}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Estimación de $d$ (2): máxima verosimilitud}
+\textbf{Haslett y Raftery (1989)}, implementado en el paquete \texttt{fracdiff} de R.
+\begin{columns}[T]
+\column{0.52\textwidth}
+\begin{block}{La idea}
+\begin{itemize}
+\item Supone que la serie es gaussiana
+\item Estima \destacar{todo a la vez}: $d$, $\phi_1,\ldots,\phi_p$, $\theta_1,\ldots,\theta_q$ y $\sigma_w^2$
+\item La verosimilitud exacta es costosa: con memoria larga la matriz de covarianzas $n\times n$ no tiene estructura sencilla
+\item Haslett y Raftery proponen una \destacar{aproximación rápida}
+\end{itemize}
+\end{block}
+\column{0.44\textwidth}
+\begin{block}{Precisión}
+En un ARFIMA$(0,d,0)$:
+\[
+\text{EE}(\hat d) \approx \sqrt{\frac{6}{\pi^2 n}}
+\]
+Con $n = 663$: \;EE $\approx 0.030$, mucho menor que la del GPH.
+\end{block}
+\end{columns}
+\vspace{0.2cm}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\textcolor{udeaverde}{\textbf{+}} Más eficiente y permite comparar modelos con AIC y BIC, como los ARIMA del curso
+\column{0.48\textwidth}
+\textcolor{rojo}{\textbf{$-$}} Hay que fijar $p$ y $q$, y depende del supuesto de normalidad
+\end{columns}
+\end{frame}
+
+% =================================================================
+\section{Aplicación: el río Nilo}
+\begin{frame}{Aplicación: niveles mínimos del río Nilo, 622 a 1284}
+\begin{columns}[T]
+\column{0.42\textwidth}
+\begin{block}{Los datos}
+\begin{itemize}
+\item 663 años medidos en el nilómetro de Roda, cerca de El Cairo (Toussoun, 1925)
+\item La serie con la que Hurst descubrió la memoria larga
+\item Paquete \texttt{longmemo} de R
+\end{itemize}
+\end{block}
+\column{0.54\textwidth}
+\begin{block}{Lo que vamos a ver en el notebook}
+\begin{enumerate}
+\item Exploración: la serie, la ACF y la PACF
+\item Pruebas de estacionariedad: ADF y KPSS
+\item Estimación de $d$: GPH y máxima verosimilitud
+\item Comparación con ARMA y ARIMA (y con \texttt{auto.arima})
+\item Diagnóstico de los residuales
+\item Pronóstico de los últimos 50 años
+\end{enumerate}
+\end{block}
+\end{columns}
+\vspace{0.4cm}
+\centering
+\footnotesize Notebook: \url{https://github.com/camilomelo928/Series-de-Tiempo} \;$\rightarrow$\; \texttt{seminario-arfima/notebooks/arfima\_nilo.ipynb}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Resultados principales}
+\begin{columns}[T]
+\column{0.5\textwidth}
+\begin{itemize}
+\item \textbf{ADF y KPSS rechazan al mismo tiempo}: ni ARMA ni ARIMA.
+\item \textbf{Modelo escogido} (menor BIC): ARFIMA$(0,d,0)$
+\[
+\hat d = 0.393 \quad [0.334,\ 0.453], \qquad \hat H = 0.89
+\]
+Estacionaria con \destacar{memoria larga}.
+\item \textbf{Parsimonia}: 1 parámetro, frente a 3 del ARMA$(2,1)$ y 4 del ARIMA$(1,1,3)$.
+\item \textbf{\texttt{auto.arima}} da ARIMA$(1,1,3)$ con KPSS y ARMA$(2,1)$ con ADF: solo puede escoger $d=0$ o $d=1$.
+\end{itemize}
+\column{0.46\textwidth}
+\centering
+\textbf{Pronóstico de los últimos 50 años (RMSE)}
+\vspace{0.2cm}
+
+\begin{tabular}{lcc}
+\toprule
+& \textbf{1 paso} & \textbf{50 pasos} \\
+\midrule
+\rowcolor{udeaclaro} ARFIMA$(0,d,0)$ & \textbf{50.1} & 62.6 \\
+ARMA$(2,1)$ & 50.8 & 68.9 \\
+ARIMA$(1,1,3)$ & 50.7 & 74.8 \\
+Media & 60.7 & \textbf{60.7} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+\small
+El ARFIMA es el mejor de los tres modelos en ambos horizontes. A 50 años la media gana: todo modelo estacionario converge a ella.
+\end{columns}
+\end{frame}
+
+% =================================================================
+\section{Conclusiones}
+\begin{frame}{Conclusiones}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\begin{block}{Ventajas}
+\begin{itemize}
+\item Llenan el vacío entre $d=0$ y $d=1$
+\item Parsimoniosos: un parámetro para la memoria
+\item Separan corto y largo plazo
+\item $d$ y $H$ son interpretables
+\item Mejores pronósticos que ARMA y ARIMA en el Nilo
+\end{itemize}
+\end{block}
+\column{0.48\textwidth}
+\begin{alertblock}{Desventajas}
+\begin{itemize}
+\item Estimación más difícil
+\item GPH depende de $m$
+\item Necesitan series largas
+\item Un cambio estructural puede parecer memoria larga
+\item No vienen en \texttt{auto.arima}
+\end{itemize}
+\end{alertblock}
+\end{columns}
+\vspace{0.3cm}
+\centering
+\textbf{Los ARFIMA no reemplazan a ARMA y ARIMA: los complementan.}
+\end{frame}
+
+% =================================================================
+\begin{frame}{Referencias y código}
+\footnotesize
+\begin{itemize}
+\item Geweke, J. y Porter-Hudak, S. (1983). \emph{Journal of Time Series Analysis}, 4(4), 221--238.
+\item Granger, C. W. J. y Joyeux, R. (1980). \emph{Journal of Time Series Analysis}, 1(1), 15--29.
+\item Haslett, J. y Raftery, A. E. (1989). \emph{Applied Statistics}, 38(1), 1--50.
+\item Hosking, J. R. M. (1981). Fractional differencing. \emph{Biometrika}, 68(1), 165--176.
+\item Hurst, H. E. (1951). \emph{Transactions of the ASCE}, 116, 770--808.
+\item Maechler, M. et al. (2026). \emph{fracdiff}. Paquete de R, versión 1.5-4.
+\item Shumway, R. H. y Stoffer, D. S. (2017). \emph{Time Series Analysis and Its Applications} (4a ed.). Springer.
+\item Toussoun, O. (1925). \emph{Mémoires de l'Institut d'Égypte}, 18, 366--404.
+\end{itemize}
+\vspace{0.3cm}
+\normalsize
+\begin{block}{Código reproducible}
+\centering \url{https://github.com/camilomelo928/Series-de-Tiempo}
+\end{block}
+\vspace{0.3cm}
+\centering
+{\Large \destacar{¿Preguntas?}}
+\end{frame}
+
+\end{document}
