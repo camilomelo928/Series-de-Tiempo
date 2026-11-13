@@ -5,6 +5,7 @@ Trabajos del curso de **Series de Tiempo I** (Estadística, Universidad de Antio
 | Proyecto | Carpeta | Qué es |
 |---|---|---|
 | Seminario ARFIMA | [`seminario-arfima/`](seminario-arfima/) | Documento escrito, notebook reproducible en R y presentación Beamer sobre modelos de memoria larga, con aplicación al río Nilo |
+| Aplicación CO₂ (SARIMA) | [`aplicacion-co2/`](aplicacion-co2/) | Análisis completo de la serie `co2` de Mauna Loa con la metodología del curso, y app Shiny para comparar modelos y su capacidad de pronóstico |
 | App de suavizamiento | [`src/suavizados.R`](src/suavizados.R) | App Shiny para comparar medias móviles, SES y Holt-Winters |
 | Copias de clase | [`copias-clase/`](copias-clase/) | Notebooks del curso ejecutados como práctica |
 
