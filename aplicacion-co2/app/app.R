@@ -14,7 +14,8 @@
 #
 #  Paquetes:
 #     install.packages(c("shiny", "bslib", "forecast", "tseries", "nortest",
-#                        "car", "ggplot2", "plotly", "DT", "gridExtra"))
+#                        "car", "ggplot2", "plotly", "DT", "gridExtra"),
+#                      repos = "https://cloud.r-project.org")
 # =====================================================================
 
 suppressPackageStartupMessages({

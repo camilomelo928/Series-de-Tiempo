@@ -80,7 +80,8 @@ Requisitos: R 4.x, Jupyter con el kernel de R (`IRkernel`) y los paquetes
 
 ```r
 install.packages(c("astsa", "forecast", "tseries", "nortest", "fBasics", "car",
-                   "MLmetrics", "ggplot2", "gridExtra", "pastecs", "lmtest"))
+                   "MLmetrics", "ggplot2", "gridExtra", "pastecs", "lmtest"),
+                 repos = "https://cloud.r-project.org")
 ```
 
 El notebook instala solo los paquetes que falten. En VS Code basta con abrir
@@ -90,7 +91,8 @@ El notebook instala solo los paquetes que falten. En VS Code basta con abrir
 
 ```r
 install.packages(c("shiny", "bslib", "forecast", "tseries", "nortest", "car",
-                   "ggplot2", "plotly", "DT", "gridExtra"))
+                   "ggplot2", "plotly", "DT", "gridExtra"),
+                 repos = "https://cloud.r-project.org")
 ```
 
 Desde PowerShell, parado en la raíz del repositorio:
