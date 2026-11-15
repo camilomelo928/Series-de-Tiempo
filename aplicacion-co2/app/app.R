@@ -447,8 +447,8 @@ ui <- page_navbar(
            plotOutput("p_lev", height = "260px")),
       caja("Box-Cox",
            tableOutput("t_bc"),
-           plotOutput("p_bc", height = "260px"),
-           nota("Si la log-verosimilitud es casi plana, la transformación no cambia nada importante y conviene no transformar."))
+           nota("Guerrero es el método indicado para series de tiempo: busca el λ que iguala la dispersión a lo largo del tiempo. ",
+                "car busca normalidad de los valores tomados como datos sueltos, lo que en una serie con tendencia no habla de la varianza."))
     ),
     caja("Diferenciación",
          layout_columns(
@@ -865,20 +865,9 @@ server <- function(input, output, session) {
     y <- serie()
     validate(need(all(y > 0), "Box-Cox necesita valores positivos."))
     pt <- tryCatch(car::powerTransform(as.numeric(y)), error = function(e) NULL)
-    data.frame(`Método` = c("Guerrero (forecast)", "Máxima verosimilitud (forecast)", "Máxima verosimilitud (car)"),
-               `λ` = c(BoxCox.lambda(y, "guerrero"), BoxCox.lambda(y, "loglik"),
-                     if (is.null(pt)) NA else unname(pt$lambda)))
+    data.frame(`Método` = c("Guerrero (forecast)", "powerTransform (car)"),
+               `λ` = c(BoxCox.lambda(y, "guerrero"), if (is.null(pt)) NA else unname(pt$lambda)))
   }, digits = 4)
-
-  output$p_bc <- renderPlot({
-    y <- serie()
-    validate(need(all(y > 0), ""))
-    b <- MASS::boxcox(as.numeric(y) ~ 1, lambda = seq(-6, 4, 0.05), plotit = FALSE)
-    df <- data.frame(l = b$x, ll = b$y)
-    ggplot(df, aes(l, ll)) + geom_line(color = "darkblue", linewidth = 1) +
-      geom_hline(yintercept = max(df$ll) - qchisq(0.95, 1) / 2, linetype = "dashed", color = "red") +
-      labs(x = expression(lambda), y = "Log-verosimilitud", title = "Perfil de Box-Cox (línea roja: IC 95 %)") + tema
-  })
 
   serie_dif <- reactive({
     y <- serie(); f <- freq()
